@@ -37,14 +37,6 @@ def intersect(offset, leaps, point):
     return None
 
 
-def cumsum(l, offset=0):
-    if not l:
-        return []
-    else:
-        offset += l[0]
-        return [offset] + cumsum(l[1:], offset)
-
-
 def pick_leap(offset, max_leap, leaps, points):
     not_in_points = [l for l in leaps if l + offset not in points]
     return max([l for l in not_in_points if l + max_leap + offset not in points])
