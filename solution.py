@@ -28,14 +28,6 @@ def verify(leaps, points):
     return True
 
 
-def inter(A, B):
-    inter = []
-    for leap in cumsum(leaps):
-        if leap in points:
-            inter.append(leap)
-    return inter
-
-
 def intersect(offset, leaps, point):
     s = offset
     for i, l in enumerate(leaps):
