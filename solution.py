@@ -28,6 +28,14 @@ def verify(leaps, points):
     return True
 
 
+def inter(A, B):
+    inter = []
+    for leap in cumsum(leaps):
+        if leap in points:
+            inter.append(leap)
+    return inter
+
+
 def intersect(offset, leaps, point):
     s = offset
     for i, l in enumerate(leaps):
@@ -35,6 +43,14 @@ def intersect(offset, leaps, point):
             return i
         s = s + l
     return None
+
+
+def cumsum(l, offset=0):
+    if not l:
+        return []
+    else:
+        offset += l[0]
+        return [offset] + cumsum(l[1:], offset)
 
 
 def pick_leap(offset, max_leap, leaps, points):
@@ -55,23 +71,20 @@ def solve(offset, leaps, points):
             reminding_points = [p for p in points if p not in surpassed]
             if next_step not in points:
                 return [max_leap] + solve(next_step, leaps, reminding_points)
+            elif next_step == min_point:
+                leaps = solve(next_step, leaps, reminding_points)
+                return [leaps[0], max_leap] + leaps[1:]
             else:
-                if len(surpassed) > 1:
-                    max_leap2 = pick_leap(offset, max_leap, leaps, points)
-                    leaps.remove(max_leap2)
-                    next_step += max_leap2
-                    return [max_leap2, max_leap] + solve(next_step, leaps, reminding_points)
-                else:
-                    leaps = solve(next_step, leaps, reminding_points)
-                    return [leaps[0], max_leap] + leaps[1:]
+                max_leap2 = pick_leap(offset, max_leap, leaps, points)
+                leaps.remove(max_leap2)
+                next_step += max_leap2
+                return [max_leap2, max_leap] + solve(next_step, leaps, reminding_points)
         else:
             points.remove(min_point)
             leaps = solve(next_step, leaps, points)
             i = intersect(next_step, leaps, min_point)
-            if i is None:
-                return [max_leap] + leaps
-            else:
-                return [leaps[i + 1]] + leaps[:i + 1] + [max_leap] + leaps[i + 2:]
+            return [max_leap] + leaps if i is None else \
+                [leaps[i + 1]] + leaps[:i + 1] + [max_leap] + leaps[i + 2:]
 
 
 def turbo_test():
