@@ -51,8 +51,7 @@ def solve(offset, leaps, points):
         next_step = offset + max_leap
         leaps.remove(max_leap)
         if next_step >= min_point:
-            surpassed = [p for p in points if p <= next_step]
-            reminding_points = [p for p in points if p not in surpassed]
+            reminding_points = [p for p in points if p > next_step]
             if next_step not in points:
                 return [max_leap] + solve(next_step, leaps, reminding_points)
             elif next_step == min_point:
