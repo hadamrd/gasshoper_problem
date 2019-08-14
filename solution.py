@@ -28,55 +28,53 @@ def verify(leaps, points):
     return True
 
 
-def intersect(offset, leaps, point):
-    s = offset
+def intersect(origin, leaps, point):
     for i, l in enumerate(leaps):
-        if s + l == point:
+        if origin + l == point:
             return i
-        s = s + l
-    return None
+        origin = origin + l
+    return -1
 
 
-def pick_leap(offset, max_leap, leaps, points):
-    not_in_points = [l for l in leaps if l + offset not in points]
-    return max([l for l in not_in_points if l + max_leap + offset not in points])
+def pick_leap(origin, max_leap, leaps, points):
+    not_in_points = [l for l in leaps if l + origin not in points]
+    return max([l for l in not_in_points if l + max_leap + origin not in points])
 
 
-def solve(offset, leaps, points):
+def swap(l, i, j):
+    if i != j:
+        temp = l[i]
+        l[i] = l[j]
+        l[j] = temp
+
+
+def solve(origin, leaps, points):
     if not points:
         return leaps
     else:
         max_leap = max(leaps)
         min_point = min(points)
-        next_step = offset + max_leap
+        next_step = origin + max_leap
         leaps.remove(max_leap)
-        if next_step >= min_point:
-            reminding_points = [p for p in points if p > next_step]
-            if next_step not in points:
-                return [max_leap] + solve(next_step, leaps, reminding_points)
-            elif next_step == min_point:
-                leaps = solve(next_step, leaps, reminding_points)
-                return [leaps[0], max_leap] + leaps[1:]
-            else:
-                max_leap2 = pick_leap(offset, max_leap, leaps, points)
-                leaps.remove(max_leap2)
-                next_step += max_leap2
-                return [max_leap2, max_leap] + solve(next_step, leaps, reminding_points)
+        remaining_points = [p for p in points if p > max(next_step, min_point)]
+        if next_step > min_point and next_step in points:
+            max_leap2 = pick_leap(origin, max_leap, leaps, points)
+            leaps.remove(max_leap2)
+            next_step += max_leap2
+            return [max_leap2, max_leap] + solve(next_step, leaps, remaining_points)
         else:
-            points.remove(min_point)
-            leaps = solve(next_step, leaps, points)
-            i = intersect(next_step, leaps, min_point)
-            return [max_leap] + leaps if i is None else \
-                [leaps[i + 1]] + leaps[:i + 1] + [max_leap] + leaps[i + 2:]
+            sol = [max_leap] + solve(next_step, leaps, remaining_points)
+            i = intersect(origin, sol, min_point)
+            swap(sol, 0, i + 1)
+            return sol
 
 
 def turbo_test():
     for k in range(1, 500):
         for _ in range(10):
             leaps, points = rand_problem(k)
-            sol = solve(0, leaps.copy(), points.copy())
+            sol = solve(0, leaps, points)
             check = verify(sol, points)
-            print(check)
             if not check:
                 raise Exception("Incorrect solution")
 
